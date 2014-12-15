@@ -11,6 +11,11 @@
 (defn tweet [twitter message]
   (.updateStatus twitter message))
 
+(def paging (Paging. 1 50))
+
+(defn user-timeline [twitter]
+  (.getUserTimeline twitter paging))
+
 (defn mentions-timeline [twitter]
   (.getMentionsTimeline twitter))
 
@@ -26,11 +31,8 @@
 (defn select-word [sentence]
   (kaiseki/token-word (first (kaiseki/tokenize sentence))))
 
-(def paging
- (Paging. (int 1) (int 50)))
-
 (defn my-tweets [twitter]
-  (map #(.getText %1) (.getUserTimeline twitter paging)))
+  (map #(.getText %1) (user-timeline twitter)))
 
 (defn -main []
   (let [twitter (make-twitter)]
