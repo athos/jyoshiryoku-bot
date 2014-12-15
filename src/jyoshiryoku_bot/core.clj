@@ -23,9 +23,8 @@
 (defn latest-mention [twitter]
   (mention->map (first (mentions-timeline twitter))))
 
-(defn select-word [twitter]
-  (kaiseki/token-word
-   (first (kaiseki/tokenize (:text (latest-mention twitter))))))
+(defn select-word [sentence]
+  (kaiseki/token-word (first (kaiseki/tokenize sentence))))
 
 (def paging
  (Paging. (int 1) (int 50)))
@@ -41,7 +40,7 @@
       (loop [old (latest-mention twitter)]
         (let [new (latest-mention twitter)]
           (when-not (= old new)
-            (let [sentence (kaiseki/create-sentence words (select-word twitter))
+            (let [sentence (kaiseki/create-sentence words (select-word (:text new)))
                   message (format ".@%s %s" (:userName new) sentence)]
               (tweet twitter message)))
           (Thread/sleep (* 1000 60 2))
