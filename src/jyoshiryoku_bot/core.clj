@@ -1,5 +1,6 @@
 (ns jyoshiryoku-bot.core
-  (:import [twitter4j TwitterFactory Twitter Paging])
+  (:import [twitter4j TwitterFactory Twitter Status Paging]
+           [twitter4j.api TimelinesResources TweetsResources])
   (:require [clojure.string :as str]
             [clojure.java.io :as io]
             [jyoshiryoku-bot.kaiseki :as kaiseki])
@@ -8,18 +9,18 @@
 (defn make-twitter []
   (.getInstance (TwitterFactory.)))
 
-(defn tweet [twitter message]
+(defn tweet [^TweetsResources twitter ^String message]
   (.updateStatus twitter message))
 
-(def paging (Paging. (int 1) (int 50)))
+(def ^Paging paging (Paging. (int 1) (int 50)))
 
-(defn user-timeline [twitter]
+(defn user-timeline [^TimelinesResources twitter]
   (.getUserTimeline twitter paging))
 
-(defn mentions-timeline [twitter]
+(defn mentions-timeline [^TimelinesResources twitter]
   (.getMentionsTimeline twitter))
 
-(defn mention->map [mention]
+(defn mention->map [^Status mention]
   (let [user (.getScreenName (.getUser mention))
         text (str/replace (.getText mention) #"(@.*?\s)+" "")
         id (.getId mention)]
@@ -29,7 +30,7 @@
   (mention->map (first (mentions-timeline twitter))))
 
 (defn my-tweets [twitter]
-  (map #(.getText %1) (user-timeline twitter)))
+  (map #(.getText ^Status %1) (user-timeline twitter)))
 
 (defn select-word [sentence]
   (kaiseki/token-word (first (kaiseki/tokenize sentence))))

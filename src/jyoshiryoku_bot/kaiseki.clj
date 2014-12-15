@@ -4,7 +4,7 @@
 (defn tokenize [text]
   (.tokenize (.build (Tokenizer/builder)) text))
 
-(defn token-word [token]
+(defn token-word [^Token token]
   (.trim (.getSurfaceForm token)))
 
 (defn register-word [m word1 word2]
