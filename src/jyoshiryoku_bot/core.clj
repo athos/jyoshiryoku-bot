@@ -43,7 +43,7 @@
         (let [new (latest-mention twitter)]
           (when-not (= old new)
             (let [sentence (kaiseki/create-sentence words (select-word (:text new)))
-                  message (format ".@%s %s" (:userName new) sentence)]
+                  message (format ".@%s %s" (:user new) sentence)]
               (tweet twitter message)))
           (Thread/sleep (* 1000 60 2))
           (recur new))))))
