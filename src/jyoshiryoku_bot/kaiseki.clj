@@ -16,14 +16,8 @@
 値: キーを次の形態素、値を出現数とするマップ"
   (ref {}))
 
-(defn inc-map-value [m k]
-  (if (get m k)
-    (update-in m [k] inc)
-    (assoc m k 1)))
-
 (defn register-word [m word1 word2]
-  (let [word2-map (get m word1 {})]
-    (assoc m word1 (inc-map-value word2-map word2))))
+  (update-in m [word1 word2] (fnil inc 0)))
 
 (defn load-text [file-name]
   (let [text (slurp file-name)
