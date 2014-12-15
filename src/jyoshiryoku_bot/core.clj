@@ -33,7 +33,7 @@
 
 (defn getmytweet []
   (let [twitter (mytwitter)]
-     (map #(. %1 getText) (.getUserTimeline twitter paging))))
+     (map #(.getText %1) (.getUserTimeline twitter paging))))
 
 (defn -main []
   (with-open [fout (io/writer "tweet.txt" :append true)]

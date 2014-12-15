@@ -2,8 +2,7 @@
   (:import (org.atilika.kuromoji Token Tokenizer)))
 
 (defn tokenize [text]
-  (let [tokenizer (. (Tokenizer/builder) build)]
-    (. tokenizer tokenize text)))
+  (.tokenize (.build (Tokenizer/builder)) text))
 
 (defn token-word [token]
   (.trim (.getSurfaceForm token)))
