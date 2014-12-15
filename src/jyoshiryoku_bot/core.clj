@@ -5,44 +5,44 @@
             [jyoshiryoku-bot.kaiseki :as kaiseki])
   (:gen-class))
 
-(defn mytwitter []
+(defn make-twitter []
   (.getInstance (TwitterFactory.)))
 
-(defn tweettimeline [twitter message]
+(defn tweet [twitter message]
   (.updateStatus twitter message))
 
-(defn mymention [twitter]
+(defn mentions-timeline [twitter]
   (lazy-seq (.getMentionsTimeline twitter)))
 
-(defn resentmention [twitter] (first (mymention twitter)))
+(defn latest-mention [twitter] (first (mentions-timeline twitter)))
 
-(defn mentionInfo [twitter]
-  (let [mention (resentmention twitter)
+(defn mention-info [twitter]
+  (let [mention (latest-mention twitter)
         mentionUser (.getScreenName (.getUser mention))
         mentionText (str/replace (.getText mention) #"(@.*?\s)+" "")
         mentionId (.getId mention)]
     {:userName mentionUser :text mentionText :id mentionId}))
 
-(defn searchword [twitter]
+(defn select-word [twitter]
   (kaiseki/token-word
-   (first (kaiseki/tokenize (:text (mentionInfo twitter))))))
+   (first (kaiseki/tokenize (:text (mention-info twitter))))))
 
 (def paging
  (Paging. (int 1) (int 50)))
 
-(defn getmytweet [twitter]
+(defn my-tweets [twitter]
   (map #(.getText %1) (.getUserTimeline twitter paging)))
 
 (defn -main []
-  (let [twitter (mytwitter)]
+  (let [twitter (make-twitter)]
     (with-open [fout (io/writer "tweet.txt" :append true)]
-      (.write fout (apply pr-str (getmytweet twitter))))
+      (.write fout (apply pr-str (my-tweets twitter))))
     (let [words (kaiseki/load-text "tweet.txt")]
-      (loop [old (mentionInfo twitter)]
-        (let [new (mentionInfo twitter)]
+      (loop [old (mention-info twitter)]
+        (let [new (mention-info twitter)]
           (when-not (= old new)
-            (let [sentence (kaiseki/create-sentence words (searchword twitter))
+            (let [sentence (kaiseki/create-sentence words (select-word twitter))
                   message (format ".@%s %s" (:userName new) sentence)]
-              (tweettimeline twitter message)))
+              (tweet twitter message)))
           (Thread/sleep (* 1000 60 2))
           (recur new))))))
