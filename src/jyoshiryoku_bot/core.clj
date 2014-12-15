@@ -8,42 +8,41 @@
 (defn mytwitter []
   (.getInstance (TwitterFactory.)))
 
-(defn tweettimeline [message]
-  (let [twitter (mytwitter)]
-    (.updateStatus twitter message)))
+(defn tweettimeline [twitter message]
+  (.updateStatus twitter message))
 
-(defn mymention []
-  (lazy-seq (.getMentionsTimeline (mytwitter))))
+(defn mymention [twitter]
+  (lazy-seq (.getMentionsTimeline twitter)))
 
-(defn resentmention [] (first (mymention)))
+(defn resentmention [twitter] (first (mymention twitter)))
 
-(defn mentionInfo []
-  (let [mention (resentmention)
+(defn mentionInfo [twitter]
+  (let [mention (resentmention twitter)
         mentionUser (.getScreenName (.getUser mention))
         mentionText (str/replace (.getText mention) #"(@.*?\s)+" "")
         mentionId (.getId mention)]
     {:userName mentionUser :text mentionText :id mentionId}))
 
-(defn searchword []
+(defn searchword [twitter]
   (kaiseki/token-word
-   (first (kaiseki/tokenize (:text (mentionInfo))))))
+   (first (kaiseki/tokenize (:text (mentionInfo twitter))))))
 
 (def paging
  (Paging. (int 1) (int 50)))
 
-(defn getmytweet []
-  (let [twitter (mytwitter)]
-     (map #(.getText %1) (.getUserTimeline twitter paging))))
+(defn getmytweet [twitter]
+  (map #(.getText %1) (.getUserTimeline twitter paging)))
 
 (defn -main []
-  (with-open [fout (io/writer "tweet.txt" :append true)]
-    (.write fout (apply pr-str (getmytweet))))
-  (let [words (kaiseki/load-text "tweet.txt")]
-    (loop [old (mentionInfo)]
-      (let [new (mentionInfo)]
-        (when-not (= old new)
-          (let [sentence (kaiseki/create-sentence words (searchword))
-                message (format ".@%s %s" (:userName new) sentence)]
-            (tweettimeline message)))
-        (Thread/sleep (* 1000 60 2))
-        (recur new)))))
+  (let [twitter (mytwitter)]
+    (with-open [fout (io/writer "tweet.txt" :append true)]
+      (.write fout (apply pr-str (getmytweet twitter))))
+    (let [words (kaiseki/load-text "tweet.txt")]
+      (loop [old (mentionInfo twitter)]
+        (let [new (mentionInfo twitter)]
+          (when-not (= old new)
+            (let [sentence (kaiseki/create-sentence words (searchword twitter))
+                  message (format ".@%s %s" (:userName new) sentence)]
+              (tweettimeline twitter message)))
+          (Thread/sleep (* 1000 60 2))
+          (recur new))))))
