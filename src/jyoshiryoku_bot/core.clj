@@ -11,7 +11,7 @@
 (defn tweet [twitter message]
   (.updateStatus twitter message))
 
-(def paging (Paging. 1 50))
+(def paging (Paging. (int 1) (int 50)))
 
 (defn user-timeline [twitter]
   (.getUserTimeline twitter paging))
