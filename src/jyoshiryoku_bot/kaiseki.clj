@@ -8,14 +8,6 @@
 (defn token-word [token]
   (.trim (.getSurfaceForm token)))
 
-
-(def ^:dynamic *words*
-  "マルコフ連鎖のモデル
-次のキーと値のマップ
-キー: 形態素
-値: キーを次の形態素、値を出現数とするマップ"
-  (ref {}))
-
 (defn register-word [m word1 word2]
   (update-in m [word1 word2] (fnil inc 0)))
 
@@ -41,8 +33,3 @@
         sentence
         (recur (str sentence word) (select-next-word word-map word)))
       sentence)))
-
-(defn init [tweettxt]
-  (dosync
-   (ref-set *words*
-            (load-text tweettxt))))

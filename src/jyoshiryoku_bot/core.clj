@@ -38,12 +38,12 @@
 (defn -main []
   (with-open [fout (io/writer "tweet.txt" :append true)]
     (.write fout (apply pr-str (getmytweet))))
-  (kaiseki/init "tweet.txt")
-  (loop [old (mentionInfo)]
-    (let [new (mentionInfo)]
-      (when-not (= old new)
-        (let [sentence (kaiseki/create-sentence @kaiseki/*words* (searchword))
-              message (format ".@%s %s" (:userName info) sentence)]
-          (tweettimeline message)))
-      (Thread/sleep (* 1000 60 2))
-      (recur new))))
+  (let [words (kaiseki/load-text "tweet.txt")]
+    (loop [old (mentionInfo)]
+      (let [new (mentionInfo)]
+        (when-not (= old new)
+          (let [sentence (kaiseki/create-sentence words (searchword))
+                message (format ".@%s %s" (:userName new) sentence)]
+            (tweettimeline message)))
+        (Thread/sleep (* 1000 60 2))
+        (recur new)))))
