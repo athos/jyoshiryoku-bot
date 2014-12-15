@@ -12,7 +12,7 @@
   (.updateStatus twitter message))
 
 (defn mentions-timeline [twitter]
-  (lazy-seq (.getMentionsTimeline twitter)))
+  (.getMentionsTimeline twitter))
 
 (defn latest-mention [twitter] (first (mentions-timeline twitter)))
 
