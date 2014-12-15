@@ -17,12 +17,8 @@
        (remove #(= (first %) ""))
        (reduce #(apply register-word %1 %2) {})))
 
-(defn select-word [word-map]
-  (first (rand-nth (seq word-map))))
-
 (defn select-next-word [word-map word]
-  (let [next-word-map (get word-map word)]
-    (select-word next-word-map)))
+  (first (rand-nth (seq (get word-map word)))))
 
 (defn create-sentence [word-map word]
   (loop [sentence ""
