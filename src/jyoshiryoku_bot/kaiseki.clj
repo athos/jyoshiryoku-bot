@@ -19,16 +19,12 @@
 (defn register-word [m word1 word2]
   (update-in m [word1 word2] (fnil inc 0)))
 
-(defn load-text [file-name]
-  (let [text (slurp file-name)
-        tokens (tokenize text)]
-    (reduce (fn [m [token1 token2]]
-              (let [word1 (token-word token1)
-                    word2 (token-word token2)]
-                (if (or (= word1 ""))
-                  m
-                  (register-word m word1 word2))))
-            {} (partition 2 1 tokens))))
+(defn load-text [filename]
+  (->> (tokenize (slurp filename))
+       (map token-word)
+       (partition 2 1)
+       (remove #(= (first %) ""))
+       (reduce #(apply register-word %1 %2) {})))
 
 (defn select-word [word-map]
   (first (rand-nth (seq word-map))))
