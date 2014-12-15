@@ -48,6 +48,6 @@
 (defn -main []
   (let [twitter (make-twitter)
         tweets (my-tweets twitter)
-        _ (spit "tweet.txt" (str/join \newline tweets))
+        _ (spit "tweet.txt" (str/join \newline tweets) :append true)
         words (kaiseki/load-text "tweet.txt")]
     (main-loop twitter words)))
