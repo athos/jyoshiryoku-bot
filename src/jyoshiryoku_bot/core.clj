@@ -34,16 +34,19 @@
 (defn select-word [sentence]
   (kaiseki/token-word (first (kaiseki/tokenize sentence))))
 
+(defn main-loop [twitter words]
+  (loop [old (latest-mention twitter)]
+    (let [new (latest-mention twitter)]
+      (when-not (= old new)
+        (let [sentence (kaiseki/create-sentence words (select-word (:text new)))
+              message (format ".@%s %s" (:user new) sentence)]
+          (tweet twitter message)))
+      (Thread/sleep (* 1000 60 2))
+      (recur new))))
+
 (defn -main []
-  (let [twitter (make-twitter)]
-    (with-open [fout (io/writer "tweet.txt" :append true)]
-      (.write fout (apply pr-str (my-tweets twitter))))
-    (let [words (kaiseki/load-text "tweet.txt")]
-      (loop [old (latest-mention twitter)]
-        (let [new (latest-mention twitter)]
-          (when-not (= old new)
-            (let [sentence (kaiseki/create-sentence words (select-word (:text new)))
-                  message (format ".@%s %s" (:user new) sentence)]
-              (tweet twitter message)))
-          (Thread/sleep (* 1000 60 2))
-          (recur new))))))
+  (let [twitter (make-twitter)
+        tweets (my-tweets twitter)
+        _ (spit "tweet.txt" (str/join \newline tweets))
+        words (kaiseki/load-text "tweet.txt")]
+    (main-loop twitter words)))
