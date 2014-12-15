@@ -21,10 +21,7 @@
   (first (rand-nth (seq (get word-map word)))))
 
 (defn create-sentence [word-map word]
-  (loop [sentence ""
-         word word]
-    (if word
-      (if (= word "\"")
-        sentence
-        (recur (str sentence word) (select-next-word word-map word)))
-      sentence)))
+  (loop [words [], word word]
+    (if (and word (not= word "\""))
+      (recur (conj words word) (select-next-word word-map word))
+      (apply str words))))
