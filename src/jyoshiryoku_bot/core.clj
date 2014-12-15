@@ -28,11 +28,11 @@
 (defn latest-mention [twitter]
   (mention->map (first (mentions-timeline twitter))))
 
-(defn select-word [sentence]
-  (kaiseki/token-word (first (kaiseki/tokenize sentence))))
-
 (defn my-tweets [twitter]
   (map #(.getText %1) (user-timeline twitter)))
+
+(defn select-word [sentence]
+  (kaiseki/token-word (first (kaiseki/tokenize sentence))))
 
 (defn -main []
   (let [twitter (make-twitter)]
