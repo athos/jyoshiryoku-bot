@@ -14,18 +14,18 @@
 (defn mentions-timeline [twitter]
   (.getMentionsTimeline twitter))
 
-(defn latest-mention [twitter] (first (mentions-timeline twitter)))
+(defn mention->map [mention]
+  (let [user (.getScreenName (.getUser mention))
+        text (str/replace (.getText mention) #"(@.*?\s)+" "")
+        id (.getId mention)]
+    {:user user :text text :id id}))
 
-(defn mention-info [twitter]
-  (let [mention (latest-mention twitter)
-        mentionUser (.getScreenName (.getUser mention))
-        mentionText (str/replace (.getText mention) #"(@.*?\s)+" "")
-        mentionId (.getId mention)]
-    {:userName mentionUser :text mentionText :id mentionId}))
+(defn latest-mention [twitter]
+  (mention->map (first (mentions-timeline twitter))))
 
 (defn select-word [twitter]
   (kaiseki/token-word
-   (first (kaiseki/tokenize (:text (mention-info twitter))))))
+   (first (kaiseki/tokenize (:text (latest-mention twitter))))))
 
 (def paging
  (Paging. (int 1) (int 50)))
@@ -38,8 +38,8 @@
     (with-open [fout (io/writer "tweet.txt" :append true)]
       (.write fout (apply pr-str (my-tweets twitter))))
     (let [words (kaiseki/load-text "tweet.txt")]
-      (loop [old (mention-info twitter)]
-        (let [new (mention-info twitter)]
+      (loop [old (latest-mention twitter)]
+        (let [new (latest-mention twitter)]
           (when-not (= old new)
             (let [sentence (kaiseki/create-sentence words (select-word twitter))
                   message (format ".@%s %s" (:userName new) sentence)]
