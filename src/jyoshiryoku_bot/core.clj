@@ -1,6 +1,6 @@
 (ns jyoshiryoku-bot.core
   (:import [twitter4j TwitterFactory Twitter Paging])
-  (:require [clojure.contrib.str-utils :as str-utils]
+  (:require [clojure.string :as str]
             [clojure.java.io :as io]
             [jyoshiryoku-bot.kaiseki :as kaiseki])
   (:gen-class))
@@ -20,7 +20,7 @@
 (defn mentionInfo []
   (let [mention (resentmention)
         mentionUser (.getScreenName (.getUser mention))
-        mentionText (str-utils/re-sub #"(@.*?\s)+" "" (.getText mention))
+        mentionText (str/replace (.getText mention) #"(@.*?\s)+" "")
         mentionId (.getId mention)]
     {:userName mentionUser :text mentionText :id mentionId}))
 
